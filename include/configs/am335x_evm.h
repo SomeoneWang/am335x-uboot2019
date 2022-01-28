@@ -126,8 +126,12 @@
 #include <environment/ti/dfu.h>
 #include <environment/ti/mmc.h>
 
+#define NET_CONFIG_ENV \
+	"ipaddr=192.168.1.200\0" \
+	"serverip=192.168.1.199\0"
+
 #define USERARGE \
-	"download_spl=fatload usb 0 0x82000000 MLO;"\
+	"download_spl_usb=fatload usb 0 0x82000000 MLO;"\
 		"nand erase.part NAND.SPL;"\
 		"nand write 0x82000000 NAND.SPL;"\
 		"nand erase.part NAND.SPL.backup1;"\
@@ -137,24 +141,53 @@
 		"nand erase.part NAND.SPL.backup3;"\
 		"nand write 0x82000000 NAND.SPL.backup3;"\
 		"mw.b 0x82000000 0 0x20000 \0" \
-	"download_uboot=fatload usb 0 0x82000000 u-boot.img;"\
+	"download_uboot_usb=fatload usb 0 0x82000000 u-boot.img;"\
 		"nand erase.part NAND.u-boot;"\
 		"nand write 0x82000000 NAND.u-boot;"\
 		"mw.b 0x82000000 0 0x100000 \0"\
-	"download_dtb=fatload usb 0 0x82000000 am335x-evm.dtb;"\
+	"download_dtb_usb=fatload usb 0 0x82000000 am335x-evm.dtb;"\
 		"nand erase.part NAND.u-boot-spl-os;"\
 		"nand write 0x82000000 NAND.u-boot-spl-os;"\
 		"mw.b 0x82000000 0 0x40000 \0"\
-	"download_kernel=fatload usb 0 0x82000000 zImage;"\
+	"download_kernel_usb=fatload usb 0 0x82000000 zImage;"\
 		"nand erase.part NAND.kernel;"\
 		"nand write 0x82000000 NAND.kernel;"\
 		"mw.b 0x82000000 0 0x80000 \0"\
-	"download_rootfs=fatload usb 0 0x82000000 ubi.img;"\
+	"download_rootfs_usb=fatload usb 0 0x82000000 ubi.img;"\
 		"nand erase.part NAND.file-system;"\
 		"nand write 0x82000000 0x00a00000 ${filesize};"\
 		"mw.b 0x82000000 0 ${filesize} \0"\
-	"download_all=run download_spl;run download_uboot;run download_dtb;run download_kernel;run download_rootfs \0"
+	"download_all_usb=run download_spl;run download_uboot;run download_dtb;run download_kernel;run download_rootfs \0"
 
+#define NET_DOWNLOAD \
+	"download_spl_net=tftpboot 0x82000000 ${serverip}:MLO;"\
+		"nand erase.part NAND.SPL;"\
+		"nand write 0x82000000 NAND.SPL;"\
+		"nand erase.part NAND.SPL.backup1;"\
+		"nand write 0x82000000 NAND.SPL.backup1;"\
+		"nand erase.part NAND.SPL.backup2;"\
+		"nand write 0x82000000 NAND.SPL.backup2;"\
+		"nand erase.part NAND.SPL.backup3;"\
+		"nand write 0x82000000 NAND.SPL.backup3;"\
+		"mw.b 0x82000000 0 0x20000 \0" \
+	"download_uboot_net=run download_spl_net;"\
+		"tftpboot 0x82000000 ${serverip}:u-boot.img;"\
+		"nand erase.part NAND.u-boot;"\
+		"nand write 0x82000000 NAND.u-boot;"\
+		"mw.b 0x82000000 0 0x100000 \0"\
+	"download_dtb_net=tftpboot 0x82000000 ${serverip}:am335x-evm.dtb;"\
+		"nand erase.part NAND.u-boot-spl-os;"\
+		"nand write 0x82000000 NAND.u-boot-spl-os;"\
+		"mw.b 0x82000000 0 0x40000 \0"\
+	"download_kernel_net=tftpboot 0x82000000 ${serverip}:zImage;"\
+		"nand erase.part NAND.kernel;"\
+		"nand write 0x82000000 NAND.kernel;"\
+		"mw.b 0x82000000 0 0x80000 \0"\
+	"download_rootfs_net=tftpboot 0x82000000 ${serverip}:ubi.img;"\
+		"nand erase.part NAND.file-system;"\
+		"nand write 0x82000000 0x00a00000 ${filesize};"\
+		"mw.b 0x82000000 0 ${filesize} \0"\
+	"download_all_net=run download_spl_net;run download_uboot_net;run download_dtb_net;run download_kernel_net;run download_rootfs_net \0" 
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
@@ -222,16 +255,12 @@
 			"setenv fdtfile am335x-icev2-prueth.dtb; fi; " \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0" \
-	"init_console=" \
-		"if test $board_name = A335_ICE; then "\
-			"setenv console ttyO3,115200n8;" \
-		"else " \
-			"setenv console ttyO0,115200n8;" \
-		"fi;\0" \
+	"init_console=setenv console ttyO0,115200n8;\0" \
 	NANDARGS \
 	NETARGS \
 	DFUARGS \
-	USERARGE \
+	NET_CONFIG_ENV \
+	NET_DOWNLOAD \
 	BOOTENV
 #endif
 

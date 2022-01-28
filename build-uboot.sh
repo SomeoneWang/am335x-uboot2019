@@ -17,8 +17,8 @@ echo "Config am335x_evm"
 
 elif [ $1 == "make" ];then	
 make O=am335x
-cp -rf am335x/spl/u-boot-spl.bin  /mnt/hgfs/ubuntu
-cp -rf am335x/MLO am335x/u-boot.bin am335x/u-boot.img   /mnt/hgfs/ubuntu
+cp -rf am335x/spl/u-boot-spl.bin  /mnt/hgfs/ubuntu/am335x
+cp -rf am335x/MLO am335x/u-boot.bin am335x/u-boot.img   /mnt/hgfs/ubuntu/am335x
 echo "Make!!!"
 
 elif [ $1 == "menuconfig" ];then	
